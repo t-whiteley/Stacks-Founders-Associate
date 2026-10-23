@@ -1,0 +1,501 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Backlog Thesis</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: a two-part click-through. Part 1 tells one story with a reveal. Part 2 shows one content move per screen: words on the left, the actual asset on the right. */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --ink:#0a0c10; --ink-2:#465063; --ink-3:#8b92a2; --line:#e1e4ea; --grid:#ebedf1;
+  --accent:#1f4fd8; --accent-soft:#e9eefc; --cut:#c94a22; --cut-soft:#fbede7; --ok:#0f7b4f; --ok-soft:#e7f4ee;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --serif:"Instrument Serif",ui-serif,Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c0f14; --surface:#141820; --ink:#eef0f4; --ink-2:#b3b9c6; --ink-3:#7b8293; --line:#242a35; --grid:#151a22;
+  --accent:#7b9bff; --accent-soft:#1a2340; --cut:#ec7a55; --cut-soft:#2a1811; --ok:#3fbf86; --ok-soft:#14261e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c0f14; --surface:#141820; --ink:#eef0f4; --ink-2:#b3b9c6; --ink-3:#7b8293; --line:#242a35; --grid:#151a22;
+  --accent:#7b9bff; --accent-soft:#1a2340; --cut:#ec7a55; --cut-soft:#2a1811; --ok:#3fbf86; --ok-soft:#14261e; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;overflow:hidden;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+p{margin:0}
+.serif{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:0;color:var(--accent)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.eyebrow b{color:var(--accent);font-weight:500}
+h1,h2{margin:0;font-weight:600;letter-spacing:-.035em;text-wrap:balance}
+h1{line-height:1;font-size:clamp(38px,6.6vw,88px);max-width:15ch}
+h2{line-height:1.05;font-size:clamp(28px,3.8vw,48px);max-width:16ch}
+h1 .serif,h2 .serif{font-size:1.06em}
+.lede{font-size:clamp(15px,1.5vw,18px);color:var(--ink-2);max-width:46ch}
+.src{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.src a{color:var(--ink-3)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+
+.deck{position:relative;height:100%}
+.scene{position:absolute;inset:0;visibility:hidden;opacity:0;transition:opacity .5s ease,visibility 0s .5s;overflow-y:auto}
+.scene.active{visibility:visible;opacity:1;transition:opacity .5s ease}
+.sc{min-height:100%;max-width:1120px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;gap:30px;
+  padding-block:56px calc(100px + env(safe-area-inset-bottom,0px));
+  padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.a{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0)*150ms + 150ms)}
+.scene.active .a{opacity:1;transform:none}
+
+/* nav */
+.navbar{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;align-items:center;gap:14px;
+  padding:12px max(20px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
+.navbar button{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:9px 14px;cursor:pointer}
+.navbar button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.navbar button:disabled{opacity:.3;cursor:default}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.prog{flex:1;display:flex;gap:16px;justify-content:center;align-items:center;min-width:0}
+.part{display:flex;flex-direction:column;gap:6px;align-items:center;min-width:0}
+.part .pl{font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.06em;white-space:nowrap}
+.part.cur .pl{color:var(--ink)}
+.dots{display:flex;gap:5px}
+.dots button{width:22px;height:4px;padding:0;border:0;border-radius:2px;background:var(--line);cursor:pointer;transition:background .3s}
+.dots button.on{background:var(--accent)}.dots button.done{background:var(--ink-3)}
+
+/* cover */
+.cover h1{max-width:13ch}
+.by{font-family:var(--mono);font-size:12px;color:var(--ink-3);display:flex;gap:18px;flex-wrap:wrap}
+.by b{color:var(--ink);font-weight:500}
+
+/* guess */
+.guess{display:flex;gap:12px;flex-wrap:wrap}
+.guess button{font:inherit;font-size:20px;font-weight:600;padding:18px 22px;border-radius:12px;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--ink);cursor:pointer;min-width:200px;text-align:left;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 16px;transition:transform .2s,background .25s,border-color .25s;box-shadow:0 2px 0 color-mix(in srgb,var(--accent) 35%,transparent)}
+.guess button::after{content:"\2192";grid-row:1 / span 2;grid-column:2;font-family:var(--mono);font-size:18px;color:var(--accent)}
+.guess.done button::after{content:none}
+.ask{font-family:var(--mono);font-size:12px;color:var(--accent);display:inline-flex;align-items:center;gap:8px}
+.ask::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+.guess button span{font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-2);grid-column:1}
+.guess button:hover{transform:translateY(-2px);background:var(--surface)}
+.guess.done button{border-color:var(--line);background:var(--surface);box-shadow:none;transform:none}
+.guess.done button{cursor:default}
+.guess.done button.right{border-color:var(--ok);background:var(--ok-soft)}
+.guess.done button.wrong{opacity:.45}
+.verdict{font-size:18px;min-height:1.6em;color:var(--ink-2)}
+.verdict b{color:var(--ok)}
+
+/* precedent */
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:820px}
+.duo .card{padding:28px;display:flex;flex-direction:column;gap:14px}
+.arr{font-family:var(--mono);font-size:56px;line-height:1}
+.duo .k{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.duo .r{color:var(--ink-2)}
+
+/* sheet */
+.sheet{max-width:560px;overflow:hidden}
+.sheet .hd{padding:11px 18px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .v{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
+.row.hl{font-weight:600;background:var(--cut-soft);transition:background .5s}
+.row.hl .v{color:var(--cut)}
+
+/* part 2 divider */
+.moves{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;max-width:1000px}
+.mv{padding:18px 18px 0 0;border-top:2px solid var(--line);position:relative;display:flex;flex-direction:column;gap:4px;min-width:0}
+.mv::before{content:"";position:absolute;top:-2px;left:0;height:2px;width:0;background:var(--accent);transition:width .7s ease;transition-delay:calc(var(--i,0)*180ms + 300ms)}
+.scene.active .mv::before{width:100%}
+.mv .d{font-family:var(--mono);font-size:11px;color:var(--accent)}
+.mv .n{font-weight:600}
+.mv .j{font-size:13px;color:var(--ink-3)}
+
+/* move layout */
+.move{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:48px;align-items:center}
+.move .txt{display:flex;flex-direction:column;gap:18px;min-width:0}
+.job{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--ink-2);padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);width:max-content;max-width:100%}
+.job b{color:var(--accent);font-weight:500}
+.asset{min-width:0;display:flex;justify-content:center}
+
+/* post */
+.post{width:100%;max-width:520px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 30px 60px -36px color-mix(in srgb,var(--ink) 40%,transparent)}
+.ptop{display:flex;gap:12px;align-items:center}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:var(--mono);font-size:11px;flex:none}
+.who{display:flex;flex-direction:column}.who b{font-size:14px}.who span{font-size:12px;color:var(--ink-3)}
+.draft{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:2px 6px}
+.pbody{white-space:pre-wrap;font-size:14.5px;line-height:1.55;min-height:17em}
+.caret{display:inline-block;width:2px;height:1.05em;background:var(--accent);vertical-align:-2px;margin-left:1px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.pfoot{border-top:1px solid var(--line);padding-top:10px;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+
+/* guest */
+.guest{width:100%;max-width:500px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.gtop{display:flex;gap:14px;align-items:center}
+.gav{width:52px;height:52px;border-radius:50%;border:1.5px dashed var(--ink-3);display:grid;place-items:center;font-family:var(--mono);font-size:11px;color:var(--ink-3);flex:none}
+.gq{display:flex;flex-direction:column;gap:10px;counter-reset:q}
+.gq li{list-style:none;display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;font-family:var(--serif);font-style:italic;font-size:21px;line-height:1.2}
+.gq li::before{counter-increment:q;content:"0" counter(q);font-family:var(--mono);font-style:normal;font-size:11px;color:var(--accent);padding-top:6px}
+.gq{margin:0;padding:0}
+
+/* clip */
+.phone{width:250px;aspect-ratio:9/16;max-width:100%;border-radius:26px;background:#0b0d12;position:relative;overflow:hidden;
+  box-shadow:0 30px 60px -30px rgba(10,12,16,.55);border:6px solid #1b1f27}
+.phone .bg{position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 25%,#2a3350 0%,#0b0d12 70%)}
+.phone .spk{position:absolute;left:50%;top:22%;transform:translateX(-50%);width:92px;height:92px;border-radius:50%;background:#3a4463;display:grid;place-items:center;color:#c9d2ee;font-family:var(--mono);font-size:10px}
+.phone .wave{position:absolute;left:50%;top:44%;transform:translateX(-50%);display:flex;gap:3px;align-items:center;height:28px}
+.phone .wave i{width:3px;border-radius:2px;background:#7b9bff;height:30%;animation:wv 1s ease-in-out infinite}
+.phone .wave i:nth-child(2n){animation-delay:.15s}.phone .wave i:nth-child(3n){animation-delay:.3s}.phone .wave i:nth-child(5n){animation-delay:.45s}
+@keyframes wv{50%{height:100%}}
+.phone .cap{position:absolute;left:14px;right:14px;bottom:64px;text-align:center;font-weight:700;font-size:21px;line-height:1.15;color:#fff;letter-spacing:-.01em}
+.phone .cap span{opacity:.25;transition:opacity .2s}
+.phone .cap span.lit{opacity:1}
+.phone .cap span.key.lit{color:#ffd166}
+.phone .lbl{position:absolute;left:14px;bottom:22px;font-family:var(--mono);font-size:10px;color:#9aa3b8}
+
+/* email */
+.mail{width:100%;max-width:520px;overflow:hidden}
+.mhd{padding:14px 18px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:64px minmax(0,1fr);gap:6px 10px;font-size:13px}
+.mhd .k{font-family:var(--mono);font-size:11px;color:var(--ink-3);padding-top:2px}
+.mhd .s{font-weight:600}
+.mbody{padding:18px;display:flex;flex-direction:column;gap:12px;font-size:14.5px;line-height:1.55}
+.mcta{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);border-radius:8px;padding:9px 14px;font-size:13px;width:max-content}
+.calc{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.cbar{display:flex;gap:3px;height:26px}
+.cbar .c{background:var(--line);border-radius:6px 2px 2px 6px;flex:0 0 62%;transition:flex-basis 1.4s cubic-bezier(.6,0,.2,1) 1s;display:flex;align-items:center;padding-left:10px;font-family:var(--mono);font-size:11px;color:var(--ink-2);white-space:nowrap;overflow:hidden}
+.scene.active .cbar .c{flex-basis:26%}
+.cbar .f{flex:1;border-radius:2px 6px 6px 2px;background:var(--ok-soft);border:1px solid color-mix(in srgb,var(--ok) 35%,var(--line));display:flex;align-items:center;padding-left:10px;font-family:var(--mono);font-size:11px;color:var(--ok);white-space:nowrap;overflow:hidden}
+
+/* machine */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:30px;max-width:1040px}
+.node{padding:16px;display:flex;flex-direction:column;gap:6px;position:relative;min-width:0}
+.node .ix{font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+.node .nm{font-weight:600}
+.node p{font-size:13px;color:var(--ink-2)}
+.node.human{border-color:var(--cut);border-style:dashed}
+.node.human .ix{color:var(--cut)}
+.node::after{content:"";position:absolute;top:50%;right:-28px;width:24px;height:2px;background:linear-gradient(90deg,var(--accent) 50%,transparent 50%) 0 0/8px 2px repeat-x}
+.node:last-child::after{display:none}
+.scene.active .node::after{animation:fd 1s linear infinite}
+@keyframes fd{to{background-position:8px 0}}
+.sign{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.sign span{user-select:all}
+
+@media (max-width:860px){
+  .move{grid-template-columns:minmax(0,1fr);gap:28px}
+  .moves{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:18px}
+  .flow{grid-template-columns:minmax(0,1fr);gap:12px}
+  .node::after{display:none}
+  .part .pl{display:none}
+}
+@media (max-width:600px){
+  body{font-size:14px}
+  .duo{grid-template-columns:minmax(0,1fr)}
+  .sc{justify-content:flex-start;padding-top:40px}
+  .guess button{flex:1;min-width:0}
+  .navbar .lbl{display:none}
+  .dots button{width:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  .a,.scene,.mv::before,.cbar .c{transition:none!important}
+  .caret,.phone .wave i{animation:none}
+  .scene.active .node::after{animation:none}
+}
+</style>
+
+<main class="deck" id="deck">
+
+<!-- 0 cover -->
+<section class="scene active" data-part="0" aria-label="Cover">
+  <div class="sc cover">
+    <div class="eyebrow a" style="--i:0">For <b>Stacks</b> · Founders Associate · one take, one content plan</div>
+    <h1 class="a" style="--i:1">Finance is about to repeat <span class="serif">its favourite mistake.</span></h1>
+    <p class="lede a" style="--i:2">It made the same bet in 1979 and got it backwards. Three minutes, then how I'd turn it into content.</p>
+    <div class="by a" style="--i:3"><span>BY <b>Tomas Whiteley</b></span><span>NAVIGATE <b>← →</b> or swipe</span></div>
+  </div>
+</section>
+
+<!-- 1 question -->
+<section class="scene" data-part="0" aria-label="The question">
+  <div class="sc">
+    <div class="eyebrow a" style="--i:0"><b>1979</b> · VisiCalc ships</div>
+    <h2 class="a" style="--i:1">Software can now do a bookkeeper's arithmetic <span class="serif">in seconds.</span></h2>
+    <p class="lede a" style="--i:2">Over the next decades, what happened to the number of accountants?</p>
+    <span class="ask a" style="--i:3" id="ask">Your guess · click one</span>
+    <div class="guess a" style="--i:3" id="guess">
+      <button type="button" data-v="fewer">Fewer<span>software took the work</span></button>
+      <button type="button" data-v="more">More<span>the work grew</span></button>
+    </div>
+    <p class="verdict" id="verdict" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- 2 answer -->
+<section class="scene" data-part="0" aria-label="The answer">
+  <div class="sc">
+    <h2 class="a" style="--i:0">The clerks went. <span class="serif">The accountants multiplied.</span></h2>
+    <div class="duo">
+      <div class="card a" style="--i:1"><span class="arr" style="color:var(--cut)">↓</span><span class="k">Bookkeepers and clerks</span><span class="r">Replaced by spreadsheet software.</span></div>
+      <div class="card a" style="--i:2"><span class="arr" style="color:var(--ok)">↑</span><span class="k">Accountants</span><span class="r">Their number went up.</span></div>
+    </div>
+    <p class="src a" style="--i:3"><a href="https://www.wfae.org/2015-02-27/how-the-electronic-spreadsheet-revolutionized-business" target="_blank" rel="noopener">NPR Planet Money, “How the electronic spreadsheet revolutionized business”, 2015</a></p>
+  </div>
+</section>
+
+<!-- 3 why -->
+<section class="scene" data-part="0" aria-label="Why">
+  <div class="sc">
+    <h1 class="a" style="--i:0">When finance work gets cheaper, <span class="serif">companies want more of it.</span></h1>
+    <p class="lede a" style="--i:1">More forecasts. More models. More questions asked of the numbers. Economists call it Jevons paradox.</p>
+  </div>
+</section>
+
+<!-- 4 today -->
+<section class="scene" data-part="0" aria-label="Today">
+  <div class="sc">
+    <div class="eyebrow a" style="--i:0"><b>Today</b> · how AI is sold to finance teams</div>
+    <h2 class="a" style="--i:0">Same work. <span class="serif">Fewer people.</span></h2>
+    <div class="card sheet a" style="--i:1">
+      <div class="hd">THE USUAL PITCH FOR AI IN FINANCE</div>
+      <div class="row"><span>Automate the month-end close</span><span class="v">the promise</span></div>
+      <div class="row hl"><span>Need fewer finance staff</span><span class="v">the payoff</span></div>
+    </div>
+    <p class="lede a" style="--i:2">It assumes the amount of finance work stays fixed. In 1979, it didn't.</p>
+  </div>
+</section>
+
+<!-- 5 thesis -->
+<section class="scene" data-part="0" aria-label="The take">
+  <div class="sc">
+    <div class="eyebrow a" style="--i:0">What most people are getting wrong</div>
+    <h1 class="a" style="--i:1">AI won't shrink finance teams. <span class="serif">It will finally let them do finance.</span></h1>
+  </div>
+</section>
+
+<!-- 6 part 2 -->
+<section class="scene" data-part="1" aria-label="The plan">
+  <div class="sc">
+    <div class="eyebrow a" style="--i:0">Part 2 · Turning it into content</div>
+    <h2 class="a" style="--i:1">One idea. <span class="serif">Five moves.</span> Two weeks.</h2>
+    <div class="moves">
+      <div class="mv" style="--i:0"><span class="d">DAY 1</span><span class="n">CEO post</span><span class="j">Start the debate</span></div>
+      <div class="mv" style="--i:1"><span class="d">DAY 4</span><span class="n">Expert episode</span><span class="j">Earn credibility</span></div>
+      <div class="mv" style="--i:2"><span class="d">DAY 7</span><span class="n">Clips</span><span class="j">Widen the reach</span></div>
+      <div class="mv" style="--i:3"><span class="d">DAY 8</span><span class="n">Newsletter</span><span class="j">Go deep</span></div>
+      <div class="mv" style="--i:4"><span class="d">DAY 9</span><span class="n">Sales follow-up</span><span class="j">Turn it into pipeline</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 post -->
+<section class="scene" data-part="1" aria-label="Move 1, the post" data-hook="type">
+  <div class="sc"><div class="move">
+    <div class="txt">
+      <div class="eyebrow a" style="--i:0"><b>Move 1 of 5</b> · Day 1 · LinkedIn</div>
+      <h2 class="a" style="--i:1">The CEO <span class="serif">starts the argument.</span></h2>
+      <p class="lede a" style="--i:2">A text post in his voice. It opens with the line every CFO has written, and ends with a question controllers will answer.</p>
+      <span class="job a" style="--i:3">JOB · <b>comments from finance leaders</b></span>
+    </div>
+    <div class="asset a" style="--i:2">
+      <article class="card post" aria-label="Draft post">
+        <div class="ptop"><div class="avatar" aria-hidden="true">CEO</div><div class="who"><b>Draft for the CEO's account</b><span>Tuesday 08:00 UK</span></div><span class="draft">DRAFT</span></div>
+        <div class="pbody" id="post"></div>
+        <div class="pfoot">First comment · link to the close calculator</div>
+      </article>
+    </div>
+  </div></div>
+</section>
+
+<!-- 8 guest -->
+<section class="scene" data-part="1" aria-label="Move 2, the expert">
+  <div class="sc"><div class="move">
+    <div class="txt">
+      <div class="eyebrow a" style="--i:0"><b>Move 2 of 5</b> · Day 4 · Podcast</div>
+      <h2 class="a" style="--i:1">Bring in someone <span class="serif">who lived it.</span></h2>
+      <p class="lede a" style="--i:2">One practitioner who shortened a hard close and kept the team. The debate from Day 1 becomes evidence, and Stacks gains a new name in its expert network.</p>
+      <span class="job a" style="--i:3">JOB · <b>credibility</b></span>
+    </div>
+    <div class="asset a" style="--i:2">
+      <div class="card guest">
+        <div class="gtop"><div class="gav" aria-hidden="true">GUEST</div><div class="who"><b>Group financial controller</b><span>Multi-entity close cut from weeks to days</span></div></div>
+        <ol class="gq">
+          <li>What did your team start doing once the close got faster?</li>
+          <li>Which part of the close would you never hand to AI?</li>
+          <li>What work had you been putting off for years?</li>
+        </ol>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 9 clips -->
+<section class="scene" data-part="1" aria-label="Move 3, the clips" data-hook="clip">
+  <div class="sc"><div class="move">
+    <div class="txt">
+      <div class="eyebrow a" style="--i:0"><b>Move 3 of 5</b> · Day 7 · Video</div>
+      <h2 class="a" style="--i:1">The best 40 seconds, <span class="serif">three times.</span></h2>
+      <p class="lede a" style="--i:2">Each clip is cut around one answer to one question, with captions people can read on mute.</p>
+      <span class="job a" style="--i:3">JOB · <b>reach beyond followers</b></span>
+    </div>
+    <div class="asset a" style="--i:2">
+      <div class="phone" aria-label="Clip mock-up with captions">
+        <div class="bg"></div>
+        <div class="spk">GUEST</div>
+        <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="cap" id="cap"></div>
+        <div class="lbl">EXAMPLE · CLIP 1 / 3 · 0:40</div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 10 newsletter -->
+<section class="scene" data-part="1" aria-label="Move 4, the newsletter">
+  <div class="sc"><div class="move">
+    <div class="txt">
+      <div class="eyebrow a" style="--i:0"><b>Move 4 of 5</b> · Day 8 · Newsletter</div>
+      <h2 class="a" style="--i:1">Give the readers <span class="serif">something to play with.</span></h2>
+      <p class="lede a" style="--i:2">The full argument, plus a close calculator. Readers enter their close and see the month they get back.</p>
+      <span class="job a" style="--i:3">JOB · <b>depth, then intent</b></span>
+    </div>
+    <div class="asset a" style="--i:2">
+      <div class="card mail">
+        <div class="mhd"><span class="k">FROM</span><span>Stacks newsletter · draft</span><span class="k">SUBJECT</span><span class="s">The wrong line in your AI business case</span></div>
+        <div class="mbody">
+          <p>In 1979, software took the bookkeeper's arithmetic. Accounting grew anyway. This issue: why the close is next, and what your team does with the month it gets back.</p>
+          <div class="calc">
+            <span class="eyebrow">Close calculator · your month</span>
+            <div class="cbar"><div class="c">Close</div><div class="f">Back to finance</div></div>
+          </div>
+          <span class="mcta">Try it with your numbers →</span>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 11 sales -->
+<section class="scene" data-part="1" aria-label="Move 5, the follow-up">
+  <div class="sc"><div class="move">
+    <div class="txt">
+      <div class="eyebrow a" style="--i:0"><b>Move 5 of 5</b> · Day 9 · Email</div>
+      <h2 class="a" style="--i:1">Sales follows up <span class="serif">with the conversation.</span></h2>
+      <p class="lede a" style="--i:2">Finance leaders who commented, watched or used the calculator get a short note from their account owner. It continues the debate instead of opening a pitch.</p>
+      <span class="job a" style="--i:3">JOB · <b>meetings booked</b></span>
+    </div>
+    <div class="asset a" style="--i:2">
+      <div class="card mail">
+        <div class="mhd"><span class="k">TO</span><span>Example · a CFO who commented on Day 1</span><span class="k">SUBJECT</span><span class="s">Your close took a day. Now what?</span></div>
+        <div class="mbody">
+          <p>Saw your comment on the headcount post. You said the first thing you'd build is a weekly cash forecast.</p>
+          <p>That's the work the close usually crowds out. Worth 20 minutes to see what your month could look like?</p>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 12 machine -->
+<section class="scene" data-part="1" aria-label="The machine">
+  <div class="sc">
+    <div class="eyebrow a" style="--i:0">How one person runs all five</div>
+    <h2 class="a" style="--i:1;max-width:20ch">One recording in. <span class="serif">Everything else drafted.</span></h2>
+    <div class="flow">
+      <div class="card node a" style="--i:2"><span class="ix">01 · TRIGGER</span><span class="nm">Episode recorded</span><p>File lands in a shared folder.</p></div>
+      <div class="card node a" style="--i:3"><span class="ix">02</span><span class="nm">Transcribe and rank</span><p>AI finds the three strongest answers.</p></div>
+      <div class="card node a" style="--i:4"><span class="ix">03</span><span class="nm">Draft in voice</span><p>Posts, clip captions, newsletter, emails.</p></div>
+      <div class="card node human a" style="--i:5"><span class="ix">04 · HUMAN</span><span class="nm">Approve</span><p>Nothing ships without a yes.</p></div>
+      <div class="card node a" style="--i:6"><span class="ix">05</span><span class="nm">Publish and tag</span><p>Engaged finance leaders flagged to sales.</p></div>
+    </div>
+    <p class="lede a" style="--i:7">Built in n8n, the tool I used for the AI competitive intelligence workflows at Philip Morris International.</p>
+    <div class="sign a" style="--i:8"><span>Tomas Whiteley</span><span>tomas.whiteley.22@ucl.ac.uk</span></div>
+  </div>
+</section>
+
+</main>
+
+<nav class="navbar" aria-label="Story navigation">
+  <button id="prev" type="button">←<span class="lbl"> Back</span></button>
+  <div class="prog" id="prog"></div>
+  <button id="next" class="primary" type="button">Start</button>
+</nav>
+
+<script>
+const $=id=>document.getElementById(id);
+const scenes=[...document.querySelectorAll('.scene')];
+const RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let cur=0, typeT=null, capT=null;
+
+/* guess */
+const G=$("guess");
+G.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+  if(G.classList.contains("done"))return;
+  G.classList.add("done"); $("ask").hidden=true;
+  G.querySelectorAll("button").forEach(x=>x.classList.add(x.dataset.v==="more"?"right":"wrong"));
+  $("verdict").innerHTML=b.dataset.v==="more"?"<b>Right.</b> Most people guess fewer.":"Most people guess that. <b>It was more.</b>";
+}));
+
+/* post */
+const POST=`Every AI business case I see in finance has the same line: headcount savings.
+
+We've run this experiment before.
+
+In 1979, spreadsheets made ledger maths almost free. Bookkeepers and clerks were replaced. The number of accountants went up.
+
+Cheaper finance work didn't mean less finance work. It meant more.
+
+AI won't shrink your finance team. It will finally let it do finance.
+
+What would your team build first if the close took a day?`;
+$("post").textContent=POST;
+function typePost(){
+  clearInterval(typeT); const el=$("post");
+  if(RM){el.textContent=POST;return}
+  let i=0; el.innerHTML='<span class="caret"></span>';
+  setTimeout(()=>{typeT=setInterval(()=>{i=Math.min(POST.length,i+2);el.textContent=POST.slice(0,i);
+    const c=document.createElement('span');c.className='caret';el.appendChild(c);if(i>=POST.length)clearInterval(typeT)},20)},700);
+}
+
+/* clip captions */
+const CAP="We didn't cut anyone. We finally built the cash forecast we'd wanted for years.".split(" ");
+const KEY=new Set(["cut","anyone.","cash","forecast"]);
+$("cap").innerHTML=CAP.map(w=>`<span class="${KEY.has(w)?'key ':''}lit">${w}</span>`).join(" ");
+function playCap(){
+  clearInterval(capT); const sp=[...$("cap").children];
+  if(RM){sp.forEach(s=>s.classList.add("lit"));return}
+  sp.forEach(s=>s.classList.remove("lit")); let i=0;
+  capT=setInterval(()=>{if(i<sp.length){sp[i++].classList.add("lit")}else{clearInterval(capT);setTimeout(()=>{if(scenes[cur].dataset.hook==="clip")playCap()},2200)}},260);
+}
+
+/* progress */
+const parts=[["THE TAKE",0],["THE CONTENT",1]];
+$("prog").innerHTML=parts.map(([l,p])=>`<div class="part" data-p="${p}"><span class="pl">${l}</span><div class="dots">${scenes.map((s,i)=>s.dataset.part==p?`<button type="button" data-i="${i}" aria-label="Go to ${s.getAttribute('aria-label')}"></button>`:"").join("")}</div></div>`).join("");
+const dots=[...$("prog").querySelectorAll("button")];
+dots.forEach(d=>d.addEventListener("click",()=>go(+d.dataset.i)));
+
+function go(i){
+  i=Math.max(0,Math.min(scenes.length-1,i)); if(i===cur){sync();return}
+  scenes[cur].classList.remove('active'); scenes[cur].inert=true;
+  cur=i; const s=scenes[cur]; s.inert=false; s.scrollTop=0; void s.offsetWidth; s.classList.add('active');
+  clearInterval(typeT); clearInterval(capT); $("post").textContent=POST;
+  if(s.dataset.hook==="type")typePost();
+  if(s.dataset.hook==="clip")playCap();
+  sync();
+}
+function sync(){
+  dots.forEach(d=>{const i=+d.dataset.i;d.classList.toggle('on',i===cur);d.classList.toggle('done',i<cur)});
+  document.querySelectorAll(".part").forEach(p=>p.classList.toggle("cur",p.dataset.p===scenes[cur].dataset.part));
+  $("prev").disabled=cur===0; const last=cur===scenes.length-1;
+  $("next").disabled=last; $("next").textContent=cur===0?"Start →":last?"End":"Next →";
+}
+scenes.forEach((s,i)=>{if(i)s.inert=true});
+$("next").addEventListener("click",()=>go(cur+1));
+$("prev").addEventListener("click",()=>go(cur-1));
+document.addEventListener("keydown",e=>{
+  if(["ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();go(cur+1)}
+  else if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();go(cur-1)}
+});
+let tx=null,ty=null;
+$("deck").addEventListener("touchstart",e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+$("deck").addEventListener("touchend",e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)go(cur+(dx<0?1:-1));tx=null},{passive:true});
+sync();
+</script>
+
+</body></html>
